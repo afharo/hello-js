@@ -9,13 +9,26 @@
   </head>
   <body>
     <script>
-    function main()
-    {
+    function deleteAllCookies() {
+      document.cookie.split(';').forEach(cookie => {
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      });
+    }
+
+    function addTextLine(div, text) {
+      const p = document.createElement('p');
+      p.appendChild(document.createTextNode(`${text} - ${performance.now()}`));
+      div.appendChild(p);
+    }
+
+    function main() {
       // Set clientSideID to your LaunchDarkly client-side ID
-      const clientSideID = '';
+      const clientSideID = '6268194d44cb5615119634ae';
 
       // Set flagKey to the feature flag key you want to evaluate
-      const flagKey = 'sample-feature';
+      const flagKey = 'showServerlessFlag';
 
       // Set up the evaluation context. This context should appear on your
       // LaunchDarkly contexts dashboard soon after you run the demo.
@@ -27,10 +40,10 @@
 
       var div = document.createElement('div');
       document.body.appendChild(div);
-      div.appendChild(document.createTextNode('Initializing...'));
+      addTextLine(div, `Initializing...`);
 
       if (clientSideID === '') {
-        div.replaceChild(document.createTextNode('Please edit index.html to set clientSideID to your LaunchDarkly client-side ID first'), div.firstChild);
+        addTextLine(div, 'Please edit index.html to set clientSideID to your LaunchDarkly client-side ID first');
         return;
       }
 
@@ -40,18 +53,20 @@
         const flagValue = ldclient.variation(flagKey, false);
       const label = `The ${flagKey} feature flag evaluates to ${flagValue}.`;
       document.body.style.background = flagValue ? '#00844B' : '#373841';
-        div.replaceChild(document.createTextNode(label), div.firstChild);
+        addTextLine(div, label);
       }
 
       ldclient.on('initialized', () => {
-        div.replaceChild(document.createTextNode('SDK successfully initialized!'), div.firstChild);
+        addTextLine(div, `SDK successfully initialized!`);
       });
       ldclient.on('failed', () => {
-        div.replaceChild(document.createTextNode('SDK failed to initialize'), div.firstChild);
+        addTextLine(div, `SDK failed to initialize`);
       });
       ldclient.on('ready', render);
       ldclient.on('change', render);
     }
+    localStorage.clear()
+    deleteAllCookies();
     main();
     </script>
   </body>
